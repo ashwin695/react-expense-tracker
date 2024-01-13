@@ -1,104 +1,142 @@
-import { useState, useRef, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';  // Change this import
-import AuthContext from './auth-context';
-import classes from './AuthForm.module.css';
-import { TextField } from '@mui/material';
+import { useState, useRef, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+
+import AuthContext from "../Page/auth-context";
+import classes from "./AuthForm.module.css";
 
 const SignUp = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
-  const confirmpasswordInputRef = useRef();
+  const confirmPasswordInputRef = useRef();
 
   const authCtx = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  const navigate = useNavigate();  // Change this line
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [error, setError] = useState();
 
-  const switchAuthModeHandler = () => {
+  const swithcAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
   };
 
   const submitHandler = (event) => {
     event.preventDefault();
-        const enteredEmail = emailInputRef.current.value;
-        const enteredPassword = passwordInputRef.current.value;
 
-    let url;
+    const enteredEmail = emailInputRef.current.value;
+    const enteredPassword = passwordInputRef.current.value;
+
+    if (!isLogin) {
+      const enteredPassword2 = confirmPasswordInputRef.current.value;
+      if (
+        enteredEmail &&
+        enteredPassword &&
+        enteredPassword2 &&
+        enteredPassword === enteredPassword2
+      ) {
+        setIsFormValid(true);
+      } else if (enteredPassword !== enteredPassword2) {
+        setError("Passwords didn't match");
+        console.log("Passwords didn't match");
+      } else {
+        setError("All Fields Are Required");
+        console.log("All Fields Are Required");
+      }
+    }
+
     setIsLoading(true);
-    if (isLogin)
-    {
-      url = 'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAoPjvxfipiUuRYpafgtPIncYCdPp6UGB4';
+    let URL;
+    if (isLogin) {
+      URL =
+      'https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAoPjvxfipiUuRYpafgtPIncYCdPp6UGB4';
+    } else {
+      URL =
+      'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoPjvxfipiUuRYpafgtPIncYCdPp6UGB4';
     }
-    else
-    {
-      url = 'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAoPjvxfipiUuRYpafgtPIncYCdPp6UGB4';
-    }
-
-    fetch(url, {
-      method: 'POST',
+    fetch(URL, {
+      method: "POST",
       body: JSON.stringify({
         email: enteredEmail,
         password: enteredPassword,
-        returnSecureToken: true
+        returnSecureToken: true,
       }),
-      headers:
-      {
-        'Content-Type': 'application/json'
+      headers: {
+        "Content-Type": "application/json",
       },
     })
-    
-    .then((res) => {
-      setIsLoading(false);
-      if (res.ok)
-      {
-        return res.json();
-      }
-      else
-      {
-        return res.json().then((data) => {
-          console.log(data)
-          let errorMessage = 'Authentication Failed!';
-          if (data && data.error && data.error.message) {
-              errorMessage = data.error.message;
-          }
-          throw new Error(errorMessage)
-        });
-      }
-    })
-    .then((data) => {
-      authCtx.login(data.idToken);
-      //navigate('/home');  // Change this line
-      alert("login successfull")
-      console.log(data)
-    })
-    .catch((err) => {
-      alert(err.message);
-    });
+      .then((res) => {
+        setIsLoading(false);
+        if (res.ok) {
+          console.log("user created");
+          return res.json();
+        } else {
+          return res.json().then((data) => {
+            let errorMessage = "Authentication failed!";
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .then((data) => {
+        authCtx.login(data.idToken);
+        navigate("/");
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
   };
 
   return (
     <section className={classes.auth}>
-      <h1>{isLogin ? 'Login' : 'Sign Up'}</h1>
+      {error && <p style={{ color: "red", textAlign: "start" }}>*{error}</p>}
+      <h1>{isLogin ? "Login" : "Sign Up"}</h1>
       <form onSubmit={submitHandler}>
         <div className={classes.control}>
-            <TextField type='email' id='email' required ref={emailInputRef} fullWidth label="Email" variant="outlined" />
+          <label htmlFor="email">Email</label>
+          <input type="email" id="email" required ref={emailInputRef} />
         </div>
         <div className={classes.control}>
-            <TextField type='password' id='password' required ref={passwordInputRef} fullWidth label="Password" variant="outlined" />
-        </div>
-        <div className={classes.control}>
-            <TextField type='password' id='confirm_password' required ref={confirmpasswordInputRef} fullWidth label="Confirm Password" variant="outlined" />
+          {isLogin && (
+            <div>
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                required
+                ref={passwordInputRef}
+              />
+            </div>
+          )}
+          {!isLogin && (
+            <div>
+              <label htmlFor="password">Password</label>
+              <input
+                type="password"
+                id="password"
+                required
+                ref={passwordInputRef}
+              />
+              <label htmlFor="password">confirm Password</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                required
+                ref={confirmPasswordInputRef}
+              />
+            </div>
+          )}
         </div>
         <div className={classes.actions}>
-          {!isLoading && <button>{isLogin ? 'Login' : 'Create Account'}</button>}
-          {isLoading && <p>Sending Request...</p>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
+          {isLoading && <p>Sending request...</p>}
           <button
-            type='button'
+            type="button"
             className={classes.toggle}
-            onClick={switchAuthModeHandler}
+            onClick={swithcAuthModeHandler}
           >
-            {isLogin ? 'Create new account' : 'Login with existing account'}
+            {isLogin ? "Create new account" : "have an account? Login"}
           </button>
         </div>
       </form>
