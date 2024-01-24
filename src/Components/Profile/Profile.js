@@ -10,6 +10,32 @@ const ProfileForm = () => {
   const authCtx = useContext(AuthContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    fetch(
+      "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyCprTZVW6b9fM51Dp_WL5C-T5yTGXa7t9s",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken: authCtx.token,
+        }),
+      }
+    )
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        const userData = data.users[0];
+        fullNameInputRef.current.value = userData.displayName;
+        profileUrlInputRef.current.value = userData.photoUrl;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
   const cancelHandler = () => {
     navigate("/");
   };
