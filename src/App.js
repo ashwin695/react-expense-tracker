@@ -8,12 +8,13 @@ import { AuthContextProvider } from "./Page/auth-context";
 import AuthContext from "./Page/auth-context";
 import { useContext } from "react";
 import ForgetPassword from "./Page/ForgetPassword";
+import { ExpenseContextProvider } from "./Page/ExpenseContext";
 
 function App() {
   const authCtx = useContext(AuthContext);
 
   return (
-    <div>
+    <ExpenseContextProvider>
       <AuthContextProvider>
       <Router>
         <Layout>
@@ -28,7 +29,7 @@ function App() {
         </Layout>
       </Router>
     </AuthContextProvider>
-    </div>
+    </ExpenseContextProvider>
   );
 }
 
