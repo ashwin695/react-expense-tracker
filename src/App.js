@@ -30,8 +30,6 @@ function App() {
         </Layout>
       </Router>
     </AuthContextProvider>
-    <Counter />
-
     </ExpenseContextProvider>
   );
 }

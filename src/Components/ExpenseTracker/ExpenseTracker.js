@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { useSelector } from "react-redux";
 import ExpenseList from "./ExpenseList.js";
 import "./ExpenseTracker.css";
 import ExpenseContext from "../../Page/ExpenseContext.js";
@@ -10,6 +11,13 @@ const ExpenseTracker = () => {
   const [expenses, setExpenses] = useState([]);
   const [editExpense, setEditExpense] = useState(false);
   const [editExpenseId, setEditExpenseId] = useState(false);
+
+  //redux items
+  const items = useSelector((state) => state.expenseStore.items);
+  const totalPrice = items.reduce(
+    (total, item) => total + Number(item.moneySpent),
+    0
+  );
 
   const expenseCtx = useContext(ExpenseContext);
 
@@ -108,6 +116,11 @@ const ExpenseTracker = () => {
         >
           {editExpense ? "Edit Expense" : "Add Expense"}
         </button>
+        {totalPrice >= 10000 && (
+          <button className="form-button" type="button">
+            Premium
+          </button>
+        )}
       </form>
 
       <ExpenseList
