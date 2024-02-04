@@ -9,6 +9,7 @@ import AuthContext from "./Page/auth-context";
 import { useContext } from "react";
 import ForgetPassword from "./Page/ForgetPassword";
 import { ExpenseContextProvider } from "./Page/ExpenseContext";
+import Counter from "./Redux/Components/Counter";
 
 function App() {
   const authCtx = useContext(AuthContext);
@@ -29,6 +30,8 @@ function App() {
         </Layout>
       </Router>
     </AuthContextProvider>
+    <Counter />
+
     </ExpenseContextProvider>
   );
 }
