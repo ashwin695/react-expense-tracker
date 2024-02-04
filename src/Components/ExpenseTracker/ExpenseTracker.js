@@ -8,12 +8,40 @@ const ExpenseTracker = () => {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [expenses, setExpenses] = useState([]);
+  const [editExpense, setEditExpense] = useState(false);
+  const [editExpenseId, setEditExpenseId] = useState(false);
 
   const expenseCtx = useContext(ExpenseContext);
 
   useEffect(() => {
     expenseCtx.fetchExpense();
   }, []);
+
+  const onEditExpense = (expense) => {
+    setEditExpense(true);
+    setMoneySpent(expense.moneySpent);
+    setDescription(expense.description);
+    setCategory(expense.category);
+    setEditExpenseId(expense.id);
+  };
+
+  const editExpenseHandler = (event) => {
+    event.preventDefault();
+
+    const editExpense = {
+      id: editExpenseId,
+      moneySpent,
+      description,
+      category,
+    };
+
+    setMoneySpent("");
+    setDescription("");
+    setCategory("");
+    setEditExpense(false);
+
+    expenseCtx.updateExpense(editExpense);
+  };
 
   const expenseSubmitHandler = (e) => {
     e.preventDefault();
@@ -73,12 +101,19 @@ const ExpenseTracker = () => {
           </select>
         </label>
         <br />
-        <button className="form-button" type="submit">
-          Add Expense
+        <button
+          className="form-button"
+          type="button"
+          onClick={editExpense ? editExpenseHandler : expenseSubmitHandler}
+        >
+          {editExpense ? "Edit Expense" : "Add Expense"}
         </button>
       </form>
 
-      <ExpenseList expenses={expenses} />
+      <ExpenseList
+         expenses={expenseCtx.expenses}
+         onEditExpense={onEditExpense}
+       />
     </div>
   );
 };
